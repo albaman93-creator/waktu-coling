@@ -126,8 +126,9 @@ class _CoolingTimerPageState extends State<CoolingTimerPage> {
     TextEditingController controller,
     FocusNode currentNode,
     FocusNode? nextNode, // Bisa null jika ini kotak terakhir
-    String label,
-  ) {
+    String label, {
+    int maxValue = 59, // Default max value adalah 59 (untuk menit dan detik)
+  }) {
     return Column(
       children: [
         Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
@@ -157,6 +158,19 @@ class _CoolingTimerPageState extends State<CoolingTimerPage> {
               counterText: '', // Hilangkan counter karakter default
             ),
             onChanged: (value) {
+              // Validasi nilai tidak melebihi maxValue
+              if (value.isNotEmpty) {
+                int inputValue = int.parse(value);
+                if (inputValue > maxValue) {
+                  controller.text = maxValue.toString();
+                  if (maxValue < 10) {
+                    controller.selection = TextSelection.fromPosition(
+                      TextPosition(offset: controller.text.length),
+                    );
+                  }
+                }
+              }
+
               // Trigger hitung setiap ada perubahan (opsional, bisa juga pakai tombol)
               _hitungDurasi();
 
@@ -194,6 +208,7 @@ class _CoolingTimerPageState extends State<CoolingTimerPage> {
                   _startHourNode,
                   _startMinNode,
                   "Jam",
+                  maxValue: 23,
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -207,6 +222,7 @@ class _CoolingTimerPageState extends State<CoolingTimerPage> {
                   _startMinNode,
                   _startSecNode,
                   "Menit",
+                  maxValue: 59,
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -220,6 +236,7 @@ class _CoolingTimerPageState extends State<CoolingTimerPage> {
                   _startSecNode,
                   _endHourNode,
                   "Detik",
+                  maxValue: 59,
                 ), // Next node lompat ke End Hour
               ],
             ),
@@ -235,7 +252,13 @@ class _CoolingTimerPageState extends State<CoolingTimerPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildTimeInput(_endHourCtrl, _endHourNode, _endMinNode, "Jam"),
+                _buildTimeInput(
+                  _endHourCtrl,
+                  _endHourNode,
+                  _endMinNode,
+                  "Jam",
+                  maxValue: 23,
+                ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
@@ -243,7 +266,13 @@ class _CoolingTimerPageState extends State<CoolingTimerPage> {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                 ),
-                _buildTimeInput(_endMinCtrl, _endMinNode, _endSecNode, "Menit"),
+                _buildTimeInput(
+                  _endMinCtrl,
+                  _endMinNode,
+                  _endSecNode,
+                  "Menit",
+                  maxValue: 59,
+                ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
@@ -256,6 +285,7 @@ class _CoolingTimerPageState extends State<CoolingTimerPage> {
                   _endSecNode,
                   null,
                   "Detik",
+                  maxValue: 59,
                 ), // Last node next is null
               ],
             ),
